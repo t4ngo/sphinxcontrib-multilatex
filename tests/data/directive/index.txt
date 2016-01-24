@@ -1,0 +1,5 @@
+
+.. latex-document:: sagitta
+   :title: Sagitta
+
+   Content of Sagitta directive

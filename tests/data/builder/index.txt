@@ -1,0 +1,14 @@
+******************************************************************************
+Ignored but necessary heading
+******************************************************************************
+
+.. latex-document:: sagitta
+   :title: Sagitta
+   :author: Hercules
+
+   Content of Sagitta directive
+
+.. toctree::
+
+   chapter1
+   chapter2

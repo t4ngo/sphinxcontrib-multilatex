@@ -1,0 +1,25 @@
+******************************************************************************
+Getting started
+******************************************************************************
+
+Overview
+==============================================================================
+
+.. include:: ../README.rst
+   :start-line: 7
+
+Installation
+==============================================================================
+
+Install this package using ``pip install sphinxcontrib-multilatex``, or
+from source using ``python setup.py install``. Then add it to your
+project's Sphinx configuration file ``conf.py``:
+
+.. code-block:: python
+
+   extensions = ['sphinxcontrib-multilatex']
+
+Minimal example
+------------------------------------------------------------------------------
+
+Yet to be written.

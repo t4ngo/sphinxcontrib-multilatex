@@ -36,7 +36,7 @@ setup(
                   "source files",
       author="Christo Butcher",
       author_email="",
-      url="https://github.com/t4ngo/sphinxcontrib.multilatex",
+      url="https://github.com/t4ngo/sphinxcontrib-multilatex",
       license="Apache 2.0",
       long_description=read("README.rst"),
       packages=find_packages(),

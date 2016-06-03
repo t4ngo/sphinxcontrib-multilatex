@@ -5,6 +5,7 @@ The ``builder`` module
 """
 
 
+import re
 import os.path
 from docutils.io import FileOutput
 from docutils.frontend import OptionParser
@@ -21,15 +22,45 @@ class MultiLatexTranslator(LaTeXTranslator):
     def __init__(self, document, builder):
         LaTeXTranslator.__init__(self, document, builder)
 
-        variables = document.settings.multilatex_variables
+        self.elements["passoptionstopackages"] += "\n\\usepackage{xr}"
+        self.elements["passoptionstopackages"] += "\n\\usepackage{xr-hyper}"
+
+        settings = document.settings
         lines = []
+
+        variables = settings.multilatex_variables
         for name, value in variables.items():
             lines.append("\\newcommand{{\\{0}}}{{{1}}}"
                          .format(name, value))
-        self.elements["preamble"] += "\n".join(lines)
-        print "----------------------------------------"
-        print self.elements["preamble"]
 
+        for filename in settings.multilatex_all_output_filenames:
+            if filename != settings.multilatex_output_filename:
+                lines.append("\\externaldocument{{{0}}}".format(filename))
+
+        self.elements["preamble"] += "\n" + "\n".join(lines)
+
+    inter_doc_re = re.compile("^%%([^%]+)(%.*)$")
+
+    def visit_reference(self, node):
+        uri = node.get("refuri", "")
+        match = self.inter_doc_re.match(uri)
+        if match:
+            other_doc = match.group(1)
+            short_uri = match.group(2)
+            node["refuri"] = short_uri
+            self.context.append(" (in external document {0})".format(other_doc))
+            try:
+                LaTeXTranslator.visit_reference(self, node)
+            finally:
+                node["refuri"] = uri
+
+        else:
+            self.context.append("")
+            LaTeXTranslator.visit_reference(self, node)
+
+    def depart_reference(self, node):
+        LaTeXTranslator.depart_reference(self, node)
+        self.body.append(self.context.pop())
 
 
 #===========================================================================
@@ -44,14 +75,32 @@ class MultiLatexBuilder(LaTeXBuilder):
         self.translator_class = MultiLatexTranslator
         super(MultiLatexBuilder, self).init()
 
+    def get_target_uri(self, docname, typ=None):
+        if docname not in self.docnames:
+            return "%%xyz%" + docname
+        else:
+            return '%' + docname
+
+    def get_relative_uri(self, from_, to, typ=None):
+        return self.get_target_uri(to, typ)
+
     def write(self, *ignored):
         print "All docs:", self.env.all_docs
+
+        # Collect info on all latex_document nodes in the docs.
+        output_document_node_pairs = []
+        all_output_filenames = []
         for docname in self.env.all_docs.keys():
             doctree = self.env.get_doctree(docname)
             for node in doctree.traverse(latex_document):
-                self.write_latex_document(node, docname)
+                output_document_node_pairs.append((node, docname))
+                all_output_filenames.append(node["multilatex-filename"])
 
-    def write_latex_document(self, latex_document_node, docname):
+        # Generate latex files.
+        for (node, docname) in output_document_node_pairs:
+            self.write_latex_document(node, docname, all_output_filenames)
+
+    def write_latex_document(self, latex_document_node, docname, all_output_filenames):
         print latex_document_node
         output_filename   = latex_document_node["multilatex-filename"]
         if not output_filename.endswith(".tex"):
@@ -103,6 +152,8 @@ class MultiLatexBuilder(LaTeXBuilder):
         doctree.settings.multilatex_options = options
         doctree.settings.multilatex_variables = variables
         doctree.settings.multilatex_content = content
+        doctree.settings.multilatex_output_filename = output_filename
+        doctree.settings.multilatex_all_output_filenames = all_output_filenames
 
         destination = FileOutput(
             destination_path=os.path.join(self.outdir, output_filename),

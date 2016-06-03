@@ -20,6 +20,7 @@ passthrough = (visit_passthrough, depart_passthrough)
 
 def setup(app):
     app.add_node(directive.latex_document,
+                 latex=passthrough,
                  html=passthrough)
     app.add_directive("latex-document", directive.LatexDocumentDirective)
     app.add_builder(builder.MultiLatexBuilder)

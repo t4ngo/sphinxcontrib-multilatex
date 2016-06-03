@@ -2,4 +2,33 @@
 Extension internals
 ******************************************************************************
 
-Yet to be written.
+References between distinct PDF documents
+==============================================================================
+
+Resolving of references
+------------------------------------------------------------------------------
+
+.. uml::
+
+    LaTeXBuilder -> LaTeXBuilder: assemble_doctree
+    LaTeXBuilder -> BuildEnvironment: resolve_references
+    BuildEnvironment -> StandardDomain: resolve_xref
+    StandardDomain -> StandardDomain: build_reference_node
+    StandardDomain -> LaTeXBuilder: get_relative_uri
+    LaTeXBuilder -> LaTeXBuilder: get_target_uri
+    alt Sphinx' builtin LaTeXBuilder
+        LaTeXBuilder -> LaTeXBuilder: Check that reference\nis in current LaTeX\noutput document
+        LaTeXBuilder ->]: raise NoUri
+    else This extension
+        LaTeXBuilder --> StandardDomain: Inter-document URI string\nfor reference node
+    end
+
+Resolving of references
+------------------------------------------------------------------------------
+
+.. uml::
+
+    LaTeXWriter -> document: walkabout
+    ... Traverse document tree ...
+    document -> LaTeXTranslator: visit_reference
+    ... Traverse document tree ...

@@ -5,6 +5,19 @@ Extension internals
 References between distinct PDF documents
 ==============================================================================
 
+Sphinx references point to the source file of their targets. That matches the
+HTML builder well, because generally one source file turns into one HTML
+output file. However, the LaTeX builder generally puts multiple source files
+into a single output file.
+
+#. Collect ``latex_document`` nodes:
+   iterate over all source files and traverse their doctrees.
+#. Assemble doctrees of ``latex_document`` nodes:
+   use Sphinx' built-in assembling logic.
+#. Determine which source files went into which ``latex_document`` nodes:
+   traverse the doctree of each ``latex_document`` node looking for
+   ``start_of_file`` nodes.
+
 Resolving of references
 ------------------------------------------------------------------------------
 

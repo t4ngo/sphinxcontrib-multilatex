@@ -11,7 +11,7 @@ from utils import with_app, pretty_print_xml
 def test_directive(app, status, warning):
     app.build()
     tree = ElementTree.parse(app.outdir / "index.xml")
-    pretty_print_xml(tree.getroot())
+#    pretty_print_xml(tree.getroot())
 
     # Verify that a latex_document node is present.
     assert len(tree.findall(".//latex_document")) == 1

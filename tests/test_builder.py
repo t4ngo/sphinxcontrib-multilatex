@@ -12,4 +12,3 @@ def test_builder(app, status, warning):
     output = (app.outdir / "sagitta.tex").text()
     assert "Lorem ipsum for the first chapter..." in output
     assert "Lorem ipsum for the second chapter..." in output
-    print output
